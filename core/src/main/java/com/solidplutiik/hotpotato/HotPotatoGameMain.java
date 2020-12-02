@@ -1,34 +1,35 @@
 package com.solidplutiik.hotpotato;
 
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.solidplutiik.hotpotato.Screen.MenuScreen;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
-public class HotPotatoGameMain extends ApplicationAdapter {
-	private SpriteBatch batch;
-	private Texture image;
+public class HotPotatoGameMain extends Game {
+	public MenuScreen menuScreen;
+	public AssetManager assetManager;
+	public SpriteBatch batch;
 
 	@Override
 	public void create() {
+		menuScreen = new MenuScreen(this);
+		assetManager = new AssetManager();
 		batch = new SpriteBatch();
-		image = new Texture("badlogic.png");
+		setScreen(menuScreen);
 	}
 
 	@Override
 	public void render() {
-		Gdx.gl.glClearColor(1, 1, 1, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		batch.begin();
-		batch.draw(image, 165, 180);
-		batch.end();
+		super.render();
 	}
 
 	@Override
 	public void dispose() {
-		batch.dispose();
-		image.dispose();
+		super.dispose();
 	}
 }
