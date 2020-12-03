@@ -30,6 +30,8 @@ public class HotPotatoGameMain extends Game {
 
 	@Override
 	public void dispose() {
+		menuScreen.dispose();
+		assetManager.dispose();
 		super.dispose();
 	}
 }
