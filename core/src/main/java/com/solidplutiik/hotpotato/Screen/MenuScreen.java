@@ -33,9 +33,11 @@ public class MenuScreen implements Screen {
     private int SCREEN_HEIGHT = 400;
     private Stage stage;
     private Skin skin;
+
     
     private BasicMap basicMap;
-    Texture backGroud;
+    private Texture backGroud;
+    private Texture menuPotato;
 
     public MenuScreen(HotPotatoGameMain game) {
         this.game = game;
@@ -106,6 +108,9 @@ public class MenuScreen implements Screen {
         });
 
         stage.addActor(table);
+        game.assetManager.load("Characters/menupotato.png", Texture.class);
+        game.assetManager.finishLoading();
+        menuPotato = game.assetManager.get("Characters/menupotato.png");
 
     }
 
@@ -116,6 +121,8 @@ public class MenuScreen implements Screen {
 
         game.batch.begin();
         game.batch.draw(backGroud, 0, 0, 800, 400);
+        game.batch.draw(menuPotato, 128, 290, 0,0, 110, 77, 1, 1, 30.0f,
+                0, 0, 287, 183, false, false );
         game.batch.end();
 
         stage.draw();
