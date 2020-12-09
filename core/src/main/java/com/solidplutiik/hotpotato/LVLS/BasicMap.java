@@ -18,11 +18,17 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.solidplutiik.TOOLS.PlayerBody;
+import com.solidplutiik.TOOLS.PotatoBody;
 import com.solidplutiik.TOOLS.StaticParser;
 import com.solidplutiik.hotpotato.HotPotatoGameMain;
 
@@ -40,6 +46,7 @@ public class BasicMap implements Screen {
    private short PlayerBit = 2;
    private short PotatoBit = 4;
    private PlayerBody player;
+   private PotatoBody potato;
 
 
     public BasicMap(HotPotatoGameMain game) {
@@ -75,6 +82,7 @@ public class BasicMap implements Screen {
 
         StaticParser sp = new StaticParser(map, "blocks", world, MapBits, (short) (PlayerBit | PotatoBit));
         player = new PlayerBody(world, game, new Vector2( 50, 100), cam, PlayerBit, (short) (MapBits | PotatoBit));
+        potato = new PotatoBody(world, game, new Vector2( 50, 200), PotatoBit, (short) (MapBits | PlayerBit));
 
 
     }
