@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.MassData;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.solidplutiik.hotpotato.HotPotatoGameMain;
@@ -19,6 +20,8 @@ public class PotatoBody {
     private Vector2 startpos;
     private short catBit;
     private short maskBits;
+
+    private Body body;
     public PotatoBody(World world, HotPotatoGameMain game, Vector2 startpos, short catBit, short maskBits) {
         this.world = world;
         this.game = game;
@@ -28,12 +31,10 @@ public class PotatoBody {
 
         BodyDef bDef = new BodyDef();
         bDef.type = BodyDef.BodyType.DynamicBody;
-        //bDef.fixedRotation = false;
+        bDef.fixedRotation = false;
         bDef.position.set(startpos);
         //Random rand = new Random(); bcus i wasnted to start with random, but then ill do that from basicmap
-        Body body = world.createBody(bDef);
-        body.setFixedRotation(false);
-        System.out.println("potato fixed  rotation? ..." + body.isFixedRotation());
+        body = world.createBody(bDef);
 
         PolygonShape shape1 = new PolygonShape();
         shape1.setAsBox(2f, 4f);
@@ -41,6 +42,10 @@ public class PotatoBody {
         FixtureDef fDef = new FixtureDef();
         fDef.shape = shape1;
         fDef.restitution = .5f;
+        fDef.density = 1; //<-important, without this no rotation, and weird physics
+        MassData massData = new MassData();
+        massData.mass = 1;
+        body.setMassData(massData);
 
         Filter filter =  fDef.filter;
         filter.categoryBits = catBit;
@@ -70,5 +75,9 @@ public class PotatoBody {
         fixture3.setUserData(this);
 
         shape3.dispose();
+    }
+
+    public Body getBody() {
+        return body;
     }
 }

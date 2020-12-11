@@ -27,6 +27,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.solidplutiik.TOOLS.ContactListeners.BasicMapContactListener;
 import com.solidplutiik.TOOLS.PlayerBody;
 import com.solidplutiik.TOOLS.PotatoBody;
 import com.solidplutiik.TOOLS.StaticParser;
@@ -42,9 +43,9 @@ public class BasicMap implements Screen {
    private Vector2 camBoundry;
    private World world;
    private Box2DDebugRenderer b2dr;
-   private short MapBits = 1;
-   private short PlayerBit = 2;
-   private short PotatoBit = 4;
+   public static final short MapBits = 1;
+   public static final short PlayerBit = 2;
+   public static final short PotatoBit = 4;
    private PlayerBody player;
    private PotatoBody potato;
 
@@ -60,7 +61,7 @@ public class BasicMap implements Screen {
         Gdx.input.setInputProcessor(null);
         //cam and viewport
         cam = new OrthographicCamera();
-        viewport = new FitViewport(26*16f,13*16f, cam);
+        viewport = new FitViewport(12*16f,6*16f, cam);
 
         //TODO load assets from game.assetsmanager +-> use game.setScreen(game.menuscreen) -> end of lvl
         //Custom assets for each game with custom character animations and even bodies later.
@@ -78,12 +79,12 @@ public class BasicMap implements Screen {
         cam.position.set(camBoundry, 0);
 
         world = new World(new Vector2(0,-9.8f), true);
+        world.setContactListener(new BasicMapContactListener());
         b2dr = new Box2DDebugRenderer();
 
         StaticParser sp = new StaticParser(map, "blocks", world, MapBits, (short) (PlayerBit | PotatoBit));
         player = new PlayerBody(world, game, new Vector2( 50, 100), cam, PlayerBit, (short) (MapBits | PotatoBit));
         potato = new PotatoBody(world, game, new Vector2( 50, 200), PotatoBit, (short) (MapBits | PlayerBit));
-
 
     }
 
