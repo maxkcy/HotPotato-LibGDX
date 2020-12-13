@@ -61,7 +61,8 @@ public class BasicMap implements Screen {
         Gdx.input.setInputProcessor(null);
         //cam and viewport
         cam = new OrthographicCamera();
-        viewport = new FitViewport(12*16f,6*16f, cam);
+        viewport = new FitViewport(24*16f,12*16f, cam);
+        //viewport.apply(); needed if cam.update isn't called/availed because no camera...
 
         //TODO load assets from game.assetsmanager +-> use game.setScreen(game.menuscreen) -> end of lvl
         //Custom assets for each game with custom character animations and even bodies later.
@@ -83,8 +84,8 @@ public class BasicMap implements Screen {
         b2dr = new Box2DDebugRenderer();
 
         StaticParser sp = new StaticParser(map, "blocks", world, MapBits, (short) (PlayerBit | PotatoBit));
-        player = new PlayerBody(world, game, new Vector2( 50, 100), cam, PlayerBit, (short) (MapBits | PotatoBit));
-        potato = new PotatoBody(world, game, new Vector2( 50, 200), PotatoBit, (short) (MapBits | PlayerBit));
+        player = new PlayerBody(world, game, new Vector2( 50, 100), PlayerBit, (short) (MapBits | PotatoBit), viewport);
+        potato = new PotatoBody(world, game, new Vector2( 50, 200), PotatoBit, (short) (MapBits | PlayerBit), cam);
 
     }
 
@@ -96,7 +97,7 @@ public class BasicMap implements Screen {
         cam.update();
         mapRenderer.setView((OrthographicCamera) cam);
         mapRenderer.render();
-        b2dr.render(world, cam.combined);
+        //b2dr.render(world, cam.combined);
 
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
             camBoundry.x += 100 * delta;
@@ -118,11 +119,14 @@ public class BasicMap implements Screen {
 
         cam.position.set(camBoundry, 0);
         player.Update();
+        potato.update();
     }
 
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height);
+        //viewport.unproject(new Vector2(width, height));
+        // bs dont need this viewport.apply(); i need to fix the fitbars bug
     }
 
     @Override
@@ -143,5 +147,6 @@ public class BasicMap implements Screen {
     @Override
     public void dispose() {
         map.dispose();
+        world.dispose();
     }
 }

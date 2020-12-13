@@ -1,5 +1,12 @@
 package com.solidplutiik.TOOLS;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.TextureArrayData;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -20,14 +27,19 @@ public class PotatoBody {
     private Vector2 startpos;
     private short catBit;
     private short maskBits;
-
+    private TextureAtlas atlas;
+    private Animation<TextureRegion> potatoAnimation;
+    private OrthographicCamera camera;
+    private float stateTime;
+    private TextureRegion keyFrame;
     private Body body;
-    public PotatoBody(World world, HotPotatoGameMain game, Vector2 startpos, short catBit, short maskBits) {
+    public PotatoBody(World world, HotPotatoGameMain game, Vector2 startpos, short catBit, short maskBits, OrthographicCamera camera) {
         this.world = world;
         this.game = game;
         this.startpos = startpos;
         this.catBit = catBit;
         this.maskBits = maskBits;
+        this.camera = camera;
 
         BodyDef bDef = new BodyDef();
         bDef.type = BodyDef.BodyType.DynamicBody;
@@ -75,6 +87,29 @@ public class PotatoBody {
         fixture3.setUserData(this);
 
         shape3.dispose();
+
+        loadAnimations();
+    }
+    private void loadAnimations(){
+        game.assetManager.load("BasicPotatoAtlas/basicpotato.atlas", TextureAtlas.class);
+        game.assetManager.finishLoading();
+        atlas = game.assetManager.get("BasicPotatoAtlas/basicpotato.atlas");
+        potatoAnimation = new Animation<TextureRegion>(1/10f, atlas.findRegions("BasicPotato"));
+    }
+
+    public void update(){
+        stateTime += Gdx.graphics.getDeltaTime();
+        keyFrame = potatoAnimation.getKeyFrame(stateTime, true);
+
+        game.batch.setProjectionMatrix(camera.combined);
+        game.batch.begin();
+        game.batch.draw(keyFrame,
+                body.getWorldCenter().x - keyFrame.getRegionWidth()/2, //remember, it's scaled after
+                body.getWorldCenter().y - keyFrame.getRegionHeight()/2,
+                keyFrame.getRegionWidth()/2, keyFrame.getRegionHeight()/2,
+                keyFrame.getRegionWidth(), keyFrame.getRegionHeight(),
+                1, 1, body.getAngle() * MathUtils.radiansToDegrees);
+        game.batch.end();
     }
 
     public Body getBody() {

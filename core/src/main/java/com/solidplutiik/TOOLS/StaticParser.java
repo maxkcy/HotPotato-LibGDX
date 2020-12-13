@@ -83,13 +83,13 @@ public class StaticParser {
                         }
                         BodyDef bDef = new BodyDef();
                         bDef.type = BodyDef.BodyType.StaticBody;
-                        bDef.position.set(ellipse.x, ellipse.y);
+                        bDef.position.set(ellipse.x + ellipse.width/2, ellipse.y + ellipse.height/2);
 
                         Body body = world.createBody(bDef);
 
 
                         CircleShape shape = new CircleShape();
-                        shape.setRadius(ellipse.width);
+                        shape.setRadius(ellipse.width/2);
 
                         FixtureDef fDef = new FixtureDef();
                         fDef.shape = shape;

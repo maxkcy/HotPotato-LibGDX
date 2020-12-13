@@ -1,0 +1,48 @@
+
+basicpotato.png
+size: 16,128
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+BasicPotato
+  rotate: false
+  xy: 2, 92
+  size: 8, 16
+  orig: 8, 16
+  offset: 0, 0
+  index: 1
+BasicPotato
+  rotate: false
+  xy: 2, 74
+  size: 8, 16
+  orig: 8, 16
+  offset: 0, 0
+  index: 2
+BasicPotato
+  rotate: false
+  xy: 2, 56
+  size: 8, 16
+  orig: 8, 16
+  offset: 0, 0
+  index: 3
+BasicPotato
+  rotate: false
+  xy: 2, 38
+  size: 8, 16
+  orig: 8, 16
+  offset: 0, 0
+  index: 4
+BasicPotato
+  rotate: false
+  xy: 2, 20
+  size: 8, 16
+  orig: 8, 16
+  offset: 0, 0
+  index: 5
+BasicPotato
+  rotate: false
+  xy: 2, 2
+  size: 8, 16
+  orig: 8, 16
+  offset: 0, 0
+  index: 6

@@ -11,21 +11,24 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import com.solidplutiik.hotpotato.HotPotatoGameMain;
 
 
 public class PlayerBody {
+    private Viewport viewport;
     public World world;
     public HotPotatoGameMain game;
     public Vector2 startPos;
     public Vector3 touch;
-    public OrthographicCamera camera;
+
     public Body body;
     private short catBit;
     private short maskBits;
@@ -47,13 +50,14 @@ public class PlayerBody {
     Fixture fixture;
 
 
-    public PlayerBody(World world, HotPotatoGameMain game, Vector2 startPos, OrthographicCamera camera, short catBit, short maskBits) {
+    public PlayerBody(World world, HotPotatoGameMain game, Vector2 startPos, short catBit, short maskBits, Viewport viewport) {
         this.world = world;
         this.game = game;
         this.startPos = startPos;
-        this.camera = camera;
+
         this.catBit = catBit;
         this.maskBits = maskBits;
+        this.viewport = viewport;
 
 
         BodyDef bodyDef = new BodyDef();
@@ -90,26 +94,34 @@ public class PlayerBody {
         getState(); //todo, change the get touch to the worldcontactlistner so that force is applied only if contacts are touching
         getTouch(); //todo, move to tools class, pass body in constructor
         initAnimatons();
+        //System.out.println(world.getContactCount());
+        //System.out.println(world.getContactList());
+
         }
 
         public void getTouch(){
             if (Gdx.input.isTouched()) {
-                touch = camera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-                float Xdif = touch.x - body.getWorldCenter().x;
-                float Ydif = touch.y - body.getWorldCenter().y -32;
+                touch = viewport.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+                float angle = MathUtils.atan2(touch.y - (body.getPosition().y - 16), touch.x - (body.getPosition().x -16)) * MathUtils.radiansToDegrees;
+                float impulseX = MathUtils.cosDeg(angle) * 1000;
+                float Xdif = touch.x - body.getPosition().x; //here
+                float Ydif = touch.y - (body.getPosition().y + 16);
 
-                if(Xdif > 0 && currentState != States.JUMP && currentState != States.FALL && touchingGroud){
+                if(Xdif > 0 && currentState != States.JUMP && currentState != States.FALL && touchingGroud && Ydif < 0){
+                    if(body.getLinearVelocity().x < 0){ body.setLinearVelocity(0, body.getLinearVelocity().y);}
                     body.applyLinearImpulse(1000, 0, body.getWorldCenter().x, body.getWorldCenter().y, true);
-                } else if (Xdif < 0 && currentState != States.JUMP && currentState != States.FALL && touchingGroud){
+                } else if (Xdif < 0 && currentState != States.JUMP && currentState != States.FALL && touchingGroud && Ydif < 0){
+                    if(body.getLinearVelocity().x > 0){ body.setLinearVelocity(0, body.getLinearVelocity().y);}
                     body.applyLinearImpulse(-1000, 0, body.getWorldCenter().x, body.getWorldCenter().y, true);
                 }
 
                 if(Ydif > 0 && (currentState != States.JUMP && currentState != States.FALL) && touchingGroud) {
 
-                    if(Xdif > 0){
-                        body.applyLinearImpulse(1000, 5000, body.getWorldCenter().x, body.getWorldCenter().y, true);
-                    } else if (Xdif < 0){
-                        body.applyLinearImpulse(-1000, 5000, body.getWorldCenter().x, body.getWorldCenter().y, true);
+                    if(Xdif >= 0){
+
+                        body.applyLinearImpulse(impulseX, 5000, body.getWorldCenter().x, body.getWorldCenter().y, true);
+                    } else if (Xdif <= 0){
+                        body.applyLinearImpulse(impulseX, 5000, body.getWorldCenter().x, body.getWorldCenter().y, true);
                     }else{
                         body.applyLinearImpulse(0, 5000, body.getWorldCenter().x, body.getWorldCenter().y, true);
                     }
@@ -208,7 +220,7 @@ public class PlayerBody {
         public void initAnimatons(){
             stateTime += Gdx.graphics.getDeltaTime();
             if (currentState != previousState){
-                stateTime = 0;
+                stateTime = 0f;
                 //previousState = currentState;
             }
             switch (currentState){
@@ -238,7 +250,7 @@ public class PlayerBody {
                     break;
             }
 
-            game.batch.setProjectionMatrix(camera.combined);
+            game.batch.setProjectionMatrix(viewport.getCamera().combined);
             game.batch.begin();
             game.batch.draw(keyFrame,
                     body.getWorldCenter().x - keyFrame.getRegionWidth()/4, //remember, it's scaled after
@@ -246,6 +258,7 @@ public class PlayerBody {
                     keyFrame.getRegionWidth()/2, keyFrame.getRegionHeight()/2,
                     8, 32,
                     1, 1, body.getAngle() * MathUtils.radiansToDegrees);
+            game.batch.draw(keyFrame, touch.x, touch.y, 3f, 3f);
             game.batch.end();
         }
     }
