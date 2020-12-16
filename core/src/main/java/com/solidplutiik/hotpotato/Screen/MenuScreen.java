@@ -10,10 +10,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -33,6 +35,7 @@ public class MenuScreen implements Screen {
     private int SCREEN_HEIGHT = 400;
     private Stage stage;
     private Skin skin;
+    private Label titleLabel;
 
     
     private BasicMap basicMap;
@@ -67,10 +70,20 @@ public class MenuScreen implements Screen {
         Gdx.input.setInputProcessor(stage);
 
         Table table = new Table();
+        //table.setDebug(true);
         table.setFillParent(true);
+        table.center();
+
+        titleLabel = new Label("HOT POTATO!", skin, "potato");
+        titleLabel.setAlignment(Align.left);
+        titleLabel.setFontScale(2, 1);
+
+        table.add(titleLabel).padBottom(25.0f).expandX();
+
+        table.row();
 
         TextButton textButton = new TextButton("play", skin, "potato");
-        table.add(textButton).padBottom(10.0f).fillX();
+        table.add(textButton).padBottom(10.0f).fill(.25f, 0);
         textButton.addListener(new ClickListener(){
 
             @Override
@@ -84,7 +97,7 @@ public class MenuScreen implements Screen {
 
         table.row();
         textButton = new TextButton("How to play", skin, "potato");
-        table.add(textButton).spaceTop(10.0f).spaceBottom(10.0f);
+        table.add(textButton).spaceTop(10.0f).spaceBottom(10.0f).fill(.25f, 0);
         textButton.addListener(new ClickListener(){
 
             @Override
@@ -97,7 +110,7 @@ public class MenuScreen implements Screen {
 
         table.row();
         textButton = new TextButton("About", skin, "potato");
-        table.add(textButton).padTop(10.0f).fillX();
+        table.add(textButton).padTop(10.0f).fill(.25f, 0);
         textButton.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -119,6 +132,7 @@ public class MenuScreen implements Screen {
         Gdx.gl.glClearColor(.25f, .2f, .75f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
         game.batch.draw(backGroud, 0, 0, 800, 400);
         game.batch.draw(menuPotato, 128, 290, 0,0, 110, 77, 1, 1, 30.0f,

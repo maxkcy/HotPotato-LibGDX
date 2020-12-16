@@ -32,6 +32,7 @@ import com.solidplutiik.TOOLS.PlayerBody;
 import com.solidplutiik.TOOLS.PotatoBody;
 import com.solidplutiik.TOOLS.StaticParser;
 import com.solidplutiik.hotpotato.HotPotatoGameMain;
+import com.solidplutiik.hotpotato.Hud.Hud;
 
 public class BasicMap implements Screen {
     HotPotatoGameMain game;
@@ -48,6 +49,8 @@ public class BasicMap implements Screen {
    public static final short PotatoBit = 4;
    private PlayerBody player;
    private PotatoBody potato;
+   public static final float PPM = 20;
+   private  Hud hud;
 
 
     public BasicMap(HotPotatoGameMain game) {
@@ -61,21 +64,21 @@ public class BasicMap implements Screen {
         Gdx.input.setInputProcessor(null);
         //cam and viewport
         cam = new OrthographicCamera();
-        viewport = new FitViewport(24*16f,12*16f, cam);
+        viewport = new FitViewport((24*16f)/PPM,(12*16f)/PPM, cam);
         //viewport.apply(); needed if cam.update isn't called/availed because no camera...
 
         //TODO load assets from game.assetsmanager +-> use game.setScreen(game.menuscreen) -> end of lvl
         //Custom assets for each game with custom character animations and even bodies later.
        mapLoader = new TmxMapLoader();
         map = mapLoader.load("TiledMaps/BasicMap.tmx");
-        mapRenderer = new OrthogonalTiledMapRenderer(map);
+        mapRenderer = new OrthogonalTiledMapRenderer(map, 1/PPM);
         //cam.position.set(30*16f, 7*16f, 0);
 
         camBoundry = new Vector2();
-        camBoundry.x = 30*16f;
-        camBoundry.y = 7*16f;
-       camBoundry.x = MathUtils.clamp(camBoundry.x, 0 + viewport.getWorldWidth()/2f, (60 * 16f) - viewport.getWorldWidth()/2);
-       camBoundry.y = MathUtils.clamp(camBoundry.y, 10 + viewport.getWorldHeight()/2f, (20 * 16f) - viewport.getWorldHeight()/2f);
+        camBoundry.x = (30*16f)/PPM;
+        camBoundry.y = (7*16f)/PPM;
+       camBoundry.x = MathUtils.clamp(camBoundry.x, (0 + viewport.getWorldWidth()/2f), ((60 * 16f) - viewport.getWorldWidth()/2));
+       camBoundry.y = MathUtils.clamp(camBoundry.y, (10 + viewport.getWorldHeight()/2f), ((20 * 16f) - viewport.getWorldHeight()/2f));
 
         cam.position.set(camBoundry, 0);
 
@@ -84,8 +87,9 @@ public class BasicMap implements Screen {
         b2dr = new Box2DDebugRenderer();
 
         StaticParser sp = new StaticParser(map, "blocks", world, MapBits, (short) (PlayerBit | PotatoBit));
-        player = new PlayerBody(world, game, new Vector2( 50, 100), PlayerBit, (short) (MapBits | PotatoBit), viewport);
-        potato = new PotatoBody(world, game, new Vector2( 50, 200), PotatoBit, (short) (MapBits | PlayerBit), cam);
+        player = new PlayerBody(world, game, new Vector2( 50/PPM, 100/PPM), PlayerBit, (short) (MapBits | PotatoBit), viewport);
+        potato = new PotatoBody(world, game, new Vector2( 50/PPM, 200/PPM), PotatoBit, (short) (MapBits | PlayerBit), cam);
+        hud = new Hud(game);
 
     }
 
@@ -97,9 +101,9 @@ public class BasicMap implements Screen {
         cam.update();
         mapRenderer.setView((OrthographicCamera) cam);
         mapRenderer.render();
-        //b2dr.render(world, cam.combined);
+        b2dr.render(world, cam.combined);
 
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+        /*if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
             camBoundry.x += 100 * delta;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)){
@@ -110,16 +114,17 @@ public class BasicMap implements Screen {
         }
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)){
             camBoundry.y -= 100 * delta;
-        }
+        }*/
 
         camBoundry.x = player.body.getPosition().x;
         camBoundry.y = player.body.getPosition().y;
-        camBoundry.x = MathUtils.clamp(camBoundry.x, 0 + viewport.getWorldWidth()/2f, (60 * 16f) - viewport.getWorldWidth()/2);
-        camBoundry.y = MathUtils.clamp(camBoundry.y, 0 + viewport.getWorldHeight()/2f, (20 * 16f) - viewport.getWorldHeight()/2f);
+        camBoundry.x = MathUtils.clamp(camBoundry.x, (0 + viewport.getWorldWidth()/2f), ((60 * 16f)/PPM - viewport.getWorldWidth()/2));
+        camBoundry.y = MathUtils.clamp(camBoundry.y, (0 + viewport.getWorldHeight()/2f), ((20 * 16f)/PPM - viewport.getWorldHeight()/2f));
 
         cam.position.set(camBoundry, 0);
         player.Update();
         potato.update();
+        hud.update();
     }
 
     @Override
@@ -148,5 +153,6 @@ public class BasicMap implements Screen {
     public void dispose() {
         map.dispose();
         world.dispose();
+        hud.dispose();
     }
 }

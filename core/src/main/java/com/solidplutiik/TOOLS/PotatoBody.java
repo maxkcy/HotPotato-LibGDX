@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.TextureArrayData;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -18,6 +19,7 @@ import com.badlogic.gdx.physics.box2d.MassData;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.solidplutiik.hotpotato.HotPotatoGameMain;
+import com.solidplutiik.hotpotato.LVLS.BasicMap;
 
 import java.util.Random;
 
@@ -33,6 +35,8 @@ public class PotatoBody {
     private float stateTime;
     private TextureRegion keyFrame;
     private Body body;
+
+    private Sprite testSprite;
     public PotatoBody(World world, HotPotatoGameMain game, Vector2 startpos, short catBit, short maskBits, OrthographicCamera camera) {
         this.world = world;
         this.game = game;
@@ -49,7 +53,7 @@ public class PotatoBody {
         body = world.createBody(bDef);
 
         PolygonShape shape1 = new PolygonShape();
-        shape1.setAsBox(2f, 4f);
+        shape1.setAsBox(2f/ BasicMap.PPM, 4f/BasicMap.PPM);
 
         FixtureDef fDef = new FixtureDef();
         fDef.shape = shape1;
@@ -69,8 +73,8 @@ public class PotatoBody {
         shape1.dispose();
 
         CircleShape shape2 = new CircleShape();
-        shape2.setRadius(2);
-        shape2.setPosition(new Vector2( 0, 4));
+        shape2.setRadius(2/BasicMap.PPM);
+        shape2.setPosition(new Vector2( 0, 4/BasicMap.PPM));
         fDef.shape = shape2;
 
         Fixture fixture2 = body.createFixture(fDef);
@@ -79,8 +83,8 @@ public class PotatoBody {
         shape2.dispose();
 
         CircleShape shape3 = new CircleShape();
-        shape3.setRadius(2);
-        shape3.setPosition(new Vector2( 0, -4));
+        shape3.setRadius(2/BasicMap.PPM);
+        shape3.setPosition(new Vector2( 0, -4/BasicMap.PPM));
         fDef.shape = shape3;
 
         Fixture fixture3 = body.createFixture(fDef);
@@ -89,26 +93,33 @@ public class PotatoBody {
         shape3.dispose();
 
         loadAnimations();
+
+        testSprite = new Sprite(potatoAnimation.getKeyFrame(stateTime));
     }
     private void loadAnimations(){
         game.assetManager.load("BasicPotatoAtlas/basicpotato.atlas", TextureAtlas.class);
         game.assetManager.finishLoading();
         atlas = game.assetManager.get("BasicPotatoAtlas/basicpotato.atlas");
         potatoAnimation = new Animation<TextureRegion>(1/10f, atlas.findRegions("BasicPotato"));
+
     }
 
     public void update(){
         stateTime += Gdx.graphics.getDeltaTime();
         keyFrame = potatoAnimation.getKeyFrame(stateTime, true);
-
         game.batch.setProjectionMatrix(camera.combined);
         game.batch.begin();
         game.batch.draw(keyFrame,
-                body.getWorldCenter().x - keyFrame.getRegionWidth()/2, //remember, it's scaled after
-                body.getWorldCenter().y - keyFrame.getRegionHeight()/2,
-                keyFrame.getRegionWidth()/2, keyFrame.getRegionHeight()/2,
-                keyFrame.getRegionWidth(), keyFrame.getRegionHeight(),
+                body.getWorldCenter().x - (keyFrame.getRegionWidth()/2)/BasicMap.PPM, //remember, it's scaled after
+                body.getWorldCenter().y - (keyFrame.getRegionHeight()/2)/BasicMap.PPM,
+                (keyFrame.getRegionWidth()/2)/BasicMap.PPM, (keyFrame.getRegionHeight()/2)/BasicMap.PPM,
+                keyFrame.getRegionWidth()/BasicMap.PPM, keyFrame.getRegionHeight()/BasicMap.PPM,
                 1, 1, body.getAngle() * MathUtils.radiansToDegrees);
+
+        //testSprite.setRegion(potatoAnimation.getKeyFrame(stateTime, true));
+        //testSprite.setPosition(20/BasicMap.PPM,20/BasicMap.PPM);
+        //testSprite.draw(game.batch);
+        //game.batch.draw(testSprite, 10/BasicMap.PPM, 10/BasicMap.PPM);
         game.batch.end();
     }
 

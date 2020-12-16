@@ -16,6 +16,7 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
+import com.solidplutiik.hotpotato.LVLS.BasicMap;
 
 
 public class StaticParser {
@@ -49,13 +50,13 @@ public class StaticParser {
                         Rectangle rect = ((RectangleMapObject) object).getRectangle();
                         BodyDef bDef = new BodyDef();
                         bDef.type = BodyDef.BodyType.StaticBody;
-                        bDef.position.set(rect.getX() + rect.getWidth()/2, rect.getY() + rect.getHeight()/2);
+                        bDef.position.set(rect.getX()/ BasicMap.PPM + rect.getWidth()/2/BasicMap.PPM, rect.getY()/BasicMap.PPM + rect.getHeight()/2/BasicMap.PPM);
 
                         Body body;
                         body = world.createBody(bDef);
 
                         PolygonShape shape = new PolygonShape();
-                        shape.setAsBox(rect.getWidth()/2, rect.getHeight()/2);
+                        shape.setAsBox(rect.getWidth()/2/BasicMap.PPM, rect.getHeight()/2/BasicMap.PPM);
                         ///shape.set is where fixuture is positioned over body. anyway thats for later.
 
                         FixtureDef fDef = new FixtureDef();
@@ -79,17 +80,17 @@ public class StaticParser {
                     } else if(object instanceof EllipseMapObject){
                         Ellipse ellipse = ((EllipseMapObject) object).getEllipse();
                         if (ellipse.height != ellipse.width){
-                            ellipse.setSize(ellipse.width, ellipse.width);
+                            ellipse.setSize(ellipse.width/BasicMap.PPM, ellipse.width/BasicMap.PPM);
                         }
                         BodyDef bDef = new BodyDef();
                         bDef.type = BodyDef.BodyType.StaticBody;
-                        bDef.position.set(ellipse.x + ellipse.width/2, ellipse.y + ellipse.height/2);
+                        bDef.position.set(ellipse.x/BasicMap.PPM + (ellipse.width/2), ellipse.y/BasicMap.PPM + (ellipse.height/2));
 
                         Body body = world.createBody(bDef);
 
 
                         CircleShape shape = new CircleShape();
-                        shape.setRadius(ellipse.width/2);
+                        shape.setRadius((ellipse.width/2));
 
                         FixtureDef fDef = new FixtureDef();
                         fDef.shape = shape;

@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
@@ -20,6 +21,7 @@ import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.solidplutiik.hotpotato.HotPotatoGameMain;
+import com.solidplutiik.hotpotato.LVLS.BasicMap;
 
 
 public class PlayerBody {
@@ -68,8 +70,8 @@ public class PlayerBody {
         body = world.createBody(bodyDef);
 
         PolygonShape shape = new PolygonShape();
-        Vector2[] playerVertices = {new Vector2(-4, -16), new Vector2(4, -16),
-                new Vector2(2, 16), new Vector2(-2, 16)};
+        Vector2[] playerVertices = {new Vector2(-2/ BasicMap.PPM, -16/BasicMap.PPM), new Vector2(2/BasicMap.PPM, -16/BasicMap.PPM),
+                new Vector2(4/BasicMap.PPM, 16/BasicMap.PPM), new Vector2(-4/BasicMap.PPM, 16/BasicMap.PPM)};
         shape.set(playerVertices);
 
         FixtureDef fixtureDef = new FixtureDef();
@@ -100,30 +102,37 @@ public class PlayerBody {
         }
 
         public void getTouch(){
-            if (Gdx.input.isTouched()) {
-                touch = viewport.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-                float angle = MathUtils.atan2(touch.y - (body.getPosition().y - 16), touch.x - (body.getPosition().x -16)) * MathUtils.radiansToDegrees;
-                float impulseX = MathUtils.cosDeg(angle) * 1000;
-                float Xdif = touch.x - body.getPosition().x; //here
-                float Ydif = touch.y - (body.getPosition().y + 16);
-
-                if(Xdif > 0 && currentState != States.JUMP && currentState != States.FALL && touchingGroud && Ydif < 0){
-                    if(body.getLinearVelocity().x < 0){ body.setLinearVelocity(0, body.getLinearVelocity().y);}
-                    body.applyLinearImpulse(1000, 0, body.getWorldCenter().x, body.getWorldCenter().y, true);
-                } else if (Xdif < 0 && currentState != States.JUMP && currentState != States.FALL && touchingGroud && Ydif < 0){
-                    if(body.getLinearVelocity().x > 0){ body.setLinearVelocity(0, body.getLinearVelocity().y);}
-                    body.applyLinearImpulse(-1000, 0, body.getWorldCenter().x, body.getWorldCenter().y, true);
+            if (Gdx.input.isKeyPressed(Input.Keys.ANY_KEY) || Gdx.input.isTouched()) {
+                if(Gdx.input.isTouched()){touch = viewport.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+                }else {touch.setZero();
+                        touch.x = body.getPosition().x;
                 }
-
-                if(Ydif > 0 && (currentState != States.JUMP && currentState != States.FALL) && touchingGroud) {
-
+                float angle = MathUtils.atan2(touch.y - (body.getPosition().y - 16/BasicMap.PPM), touch.x - (body.getPosition().x)) * MathUtils.radiansToDegrees;
+                float impulseX = (MathUtils.cosDeg(angle) * 1000)/(BasicMap.PPM*75);
+                float Xdif = touch.x - body.getPosition().x; //here
+                float Ydif = touch.y - (body.getPosition().y + 16/BasicMap.PPM);
+                if((Xdif > 0 || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) && currentState != States.JUMP && currentState != States.FALL && touchingGroud && Ydif < 0){
+                    if(body.getLinearVelocity().x < 0){ body.setLinearVelocity(0, body.getLinearVelocity().y);}
+                    if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){body.applyLinearImpulse(1000/(BasicMap.PPM*75), 0, body.getWorldCenter().x, body.getWorldCenter().y, true);}
+                    if(Xdif < 1){impulseX *= Xdif;}
+                    body.applyLinearImpulse(impulseX, 0, body.getWorldCenter().x, body.getWorldCenter().y, true);
+                } else if ((Xdif < 0 || Gdx.input.isKeyPressed(Input.Keys.LEFT)) && currentState != States.JUMP && currentState != States.FALL && touchingGroud && Ydif < 0){
+                    if(body.getLinearVelocity().x > 0){ body.setLinearVelocity(0, body.getLinearVelocity().y);}
+                    if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){body.applyLinearImpulse(-1000/(BasicMap.PPM*75), 0, body.getWorldCenter().x, body.getWorldCenter().y, true);}
+                    if(Xdif > -1){impulseX *= -Xdif;}
+                    body.applyLinearImpulse(impulseX, 0, body.getWorldCenter().x, body.getWorldCenter().y, true);
+                }
+                if((Ydif > 0 || Gdx.input.isKeyPressed(Input.Keys.UP)) && (currentState != States.JUMP && currentState != States.FALL) && touchingGroud) {
+                    if(Gdx.input.isKeyPressed(Input.Keys.UP)){
+                        Xdif = 0;
+                    impulseX = 0;
+                    }
                     if(Xdif >= 0){
-
-                        body.applyLinearImpulse(impulseX, 5000, body.getWorldCenter().x, body.getWorldCenter().y, true);
+                        body.applyLinearImpulse(impulseX, 5000/(BasicMap.PPM*75), body.getWorldCenter().x, body.getWorldCenter().y, true);
                     } else if (Xdif <= 0){
-                        body.applyLinearImpulse(impulseX, 5000, body.getWorldCenter().x, body.getWorldCenter().y, true);
+                        body.applyLinearImpulse(impulseX, 5000/(BasicMap.PPM*75), body.getWorldCenter().x, body.getWorldCenter().y, true);
                     }else{
-                        body.applyLinearImpulse(0, 5000, body.getWorldCenter().x, body.getWorldCenter().y, true);
+                        body.applyLinearImpulse(0, 5000/(BasicMap.PPM*75), body.getWorldCenter().x, body.getWorldCenter().y, true);
                     }
                 } //else if (Ydif < 0){
                 //body.applyLinearImpulse(0, 0, body.getWorldCenter().x, body.getWorldCenter().y, true);
@@ -131,16 +140,16 @@ public class PlayerBody {
             }
         }
         public States getState(){
-            if (body.getLinearVelocity().y > 1) {
+            if (body.getLinearVelocity().y > 1/BasicMap.PPM) {
                 previousState = currentState;
                 currentState = States.JUMP;
-            }else if (body.getLinearVelocity().y < -1){
+            }else if (body.getLinearVelocity().y < -1/BasicMap.PPM){
                 previousState = currentState;
                 currentState = States.FALL;
-            }else if (body.getLinearVelocity().x == 0 && (body.getLinearVelocity().y <=1 || body.getLinearVelocity().y >=-1)){
+            }else if (body.getLinearVelocity().x == 0 && (body.getLinearVelocity().y <=1/BasicMap.PPM || body.getLinearVelocity().y >=-1/BasicMap.PPM)){
                 previousState = currentState;
                 currentState = States.IDLE;
-            } else if((body.getLinearVelocity().x > 0 || body.getLinearVelocity().x < 0) && (body.getLinearVelocity().y <= 1 || body.getLinearVelocity().y >= -1)){
+            } else if((body.getLinearVelocity().x > 0 || body.getLinearVelocity().x < 0) && (body.getLinearVelocity().y <= 1/BasicMap.PPM || body.getLinearVelocity().y >= -1/BasicMap.PPM)){
                 previousState = currentState;
                 currentState = States.WALK;
             }
@@ -253,12 +262,12 @@ public class PlayerBody {
             game.batch.setProjectionMatrix(viewport.getCamera().combined);
             game.batch.begin();
             game.batch.draw(keyFrame,
-                    body.getWorldCenter().x - keyFrame.getRegionWidth()/4, //remember, it's scaled after
-                    body.getWorldCenter().y - 14,
+                    body.getWorldCenter().x - (keyFrame.getRegionWidth()/4)/BasicMap.PPM, //remember, it's scaled after
+                    body.getWorldCenter().y - 14/BasicMap.PPM,
                     keyFrame.getRegionWidth()/2, keyFrame.getRegionHeight()/2,
-                    8, 32,
+                    8/BasicMap.PPM, 32/BasicMap.PPM,
                     1, 1, body.getAngle() * MathUtils.radiansToDegrees);
-            game.batch.draw(keyFrame, touch.x, touch.y, 3f, 3f);
+            game.batch.draw(keyFrame, touch.x, touch.y, 3f/BasicMap.PPM, 3f/BasicMap.PPM);
             game.batch.end();
         }
     }
